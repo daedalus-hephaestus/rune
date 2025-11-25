@@ -1,0 +1,8 @@
+{
+	"name": "daedalus",
+	location: {
+		"tile": [0, 0],
+		"coords": [0, 0]
+	},
+	"realm": "midgard"
+}

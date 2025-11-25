@@ -3,6 +3,11 @@ package rune
 import "core:fmt"
 import "core:mem"
 
+JSON_PATH :: "/home/daedalus/dev/odin_projects/rune/json"
+PLAYER_NAME :: "daedalus"
+
+player : Player
+
 main :: proc() {
 
 	when ODIN_DEBUG {
@@ -25,6 +30,5 @@ main :: proc() {
 		}
 	}
 
-	// write code below this line
-	fmt.println("rune created")
+	window(100, 100)
 }

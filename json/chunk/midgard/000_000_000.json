@@ -1,0 +1,15 @@
+{
+	coords: [0, 0, 0],
+	"realm": "midgard",
+	"entities": {
+		"enemy": [],
+		"npc": [],
+		"objects": [] 
+	},
+	"warps": [],
+	"tilemap": {
+		"ground": [],
+		"upper": [],
+		"lower": []
+	}
+}
