@@ -1,3 +1,4 @@
+#+feature dynamic-literals
 package rune
 
 import "core:fmt"
