@@ -3,8 +3,8 @@ package rune
 import "core:fmt"
 import rl "vendor:raylib"
 
-unloaded_chunks: map[cstring][dynamic]Chunk
-loaded_chunks: [dynamic]Chunk
+unloaded_chunks: map[cstring]map[rl.Vector3]Chunk
+loaded_chunks: map[rl.Vector3]Chunk
 tiles: map[cstring]Tile
 
 TileType :: enum {
@@ -41,11 +41,15 @@ load_tile :: proc(t: ^Tile) {
 	tiles[t.name] = t^
 }
 
+destroy_tiles :: proc() {
+	delete(tiles)
+}
+
 preload_chunk :: proc(c: ^Chunk) {
 
 	realm, has := &unloaded_chunks[c.realm]
 	if !has {
-		unloaded_chunks[c.realm] = make([dynamic]Chunk)
+		unloaded_chunks[c.realm] = make(map[rl.Vector3]Chunk)
 		realm = &unloaded_chunks[c.realm]
 	}
 
@@ -60,8 +64,11 @@ preload_chunk :: proc(c: ^Chunk) {
 		}
 	}
 
-	append(realm, c^)
+	realm[c.coords] = c^
 
+}
+
+load_chunk :: proc(c: Chunk) {
 }
 
 draw_chunk :: proc(c: Chunk) {
@@ -77,7 +84,6 @@ draw_chunk :: proc(c: Chunk) {
 }
 
 draw_loaded_chunks :: proc() {
-	for c in loaded_chunks do draw_chunk(c)
 }
 
 destroy_chunk :: proc(c: ^Chunk) {
@@ -85,7 +91,7 @@ destroy_chunk :: proc(c: ^Chunk) {
 
 destroy_all_chunks :: proc() {
 	for realm in unloaded_chunks {
-		for &c in unloaded_chunks[realm] do destroy_chunk(&c)
+		for _, &c in unloaded_chunks[realm] do destroy_chunk(&c)
 		delete(unloaded_chunks[realm])
 	}
 	delete(unloaded_chunks)

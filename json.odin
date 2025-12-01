@@ -75,6 +75,7 @@ load_json :: proc(path: string, $T: typeid) -> T {
 
 destroy_assets :: proc() {
 	unload_textures()
+	destroy_tiles()
 	delete(img)
 	vmem.arena_destroy(&json_arena)
 }
