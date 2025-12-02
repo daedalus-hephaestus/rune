@@ -3,9 +3,7 @@ package rune
 import "core:fmt"
 import rl "vendor:raylib"
 
-unloaded_chunks: map[cstring]map[rl.Vector3]Chunk
 loaded_chunks: map[rl.Vector3]Chunk
-tiles: map[cstring]Tile
 
 TileType :: enum {
 	SOLID,
@@ -36,39 +34,48 @@ Tile :: struct {
 	type: TileType,
 }
 
-load_tile :: proc(t: ^Tile) {
-	load_img_name(t.img)
-	tiles[t.name] = t^
+load_tile :: proc(t: ^Tile, tile_map: ^map[cstring]Tile, img_map: ^map[cstring]Image) {
+	load_img_name(t.img, img_map)
+	tile_map[t.name] = t^
 }
 
-destroy_tiles :: proc() {
-	delete(tiles)
+destroy_tiles :: proc(tile_map: ^map[cstring]Tile) {
+	delete(tile_map^)
 }
 
-preload_chunk :: proc(c: ^Chunk) {
+preload_chunk :: proc(
+	c: ^Chunk,
+	tile_map: ^map[cstring]Tile,
+	img_map: ^map[cstring]Image,
+	unloaded: ^map[cstring]map[rl.Vector3]Chunk,
+) {
 
-	realm, has := &unloaded_chunks[c.realm]
+	realm, has := &unloaded[c.realm]
 	if !has {
-		unloaded_chunks[c.realm] = make(map[rl.Vector3]Chunk)
-		realm = &unloaded_chunks[c.realm]
+		unloaded[c.realm] = make(map[rl.Vector3]Chunk)
+		realm = &unloaded[c.realm]
 	}
 
 	for t in c.tilemap.tiles {
-		_, has := tiles[t]
+		_, has := tile_map[t]
 		if !has {
 			path := fmt.aprintf("json/tile/%v.json", t)
 			defer delete(path)
 
 			data := load_json(path, Tile)
-			load_tile(&data)
+			load_tile(&data, tile_map, img_map)
 		}
 	}
 
 	realm[c.coords] = c^
-
 }
 
-load_chunk :: proc(c: Chunk) {
+load_chunk :: proc(
+	c: Chunk,
+	unloaded: map[cstring]map[rl.Vector3]Chunk,
+	loaded: ^map[rl.Vector3]Chunk,
+) {
+
 }
 
 draw_chunk :: proc(c: Chunk) {
@@ -77,7 +84,8 @@ draw_chunk :: proc(c: Chunk) {
 			if tile > 0 {
 				name := c.tilemap.tiles[tile - 1]
 				i := img[tiles[name].img]
-				rl.DrawTextureEx(i.texture, {f32(x), f32(y)} * 16 * SCALE, 0, SCALE, rl.WHITE)
+				pos := rl.Vector2({f32(x), f32(y)}) * 16 * SCALE
+				rl.DrawTextureEx(i.texture, pos, 0, SCALE, rl.WHITE)
 			}
 		}
 	}
@@ -86,14 +94,11 @@ draw_chunk :: proc(c: Chunk) {
 draw_loaded_chunks :: proc() {
 }
 
-destroy_chunk :: proc(c: ^Chunk) {
-}
-
-destroy_all_chunks :: proc() {
-	for realm in unloaded_chunks {
-		for _, &c in unloaded_chunks[realm] do destroy_chunk(&c)
-		delete(unloaded_chunks[realm])
-	}
-	delete(unloaded_chunks)
-	delete(loaded_chunks)
+destroy_all_chunks :: proc(
+	unloaded: ^map[cstring]map[rl.Vector3]Chunk,
+	loaded: ^map[rl.Vector3]Chunk,
+) {
+	for realm in unloaded do delete(unloaded[realm])
+	delete(unloaded^)
+	delete(loaded^)
 }

@@ -1,16 +1,15 @@
 package rune
 
-import rl "vendor:raylib"
 import "core:fmt"
+import rl "vendor:raylib"
 
-SCALE :: 4
+SCALE :: 1
 
 window :: proc(w, h: i32) {
 	rl.SetTraceLogLevel(.ERROR)
-	rl.SetConfigFlags({.WINDOW_RESIZABLE, .WINDOW_MAXIMIZED})
 	rl.InitWindow(w, h, "rune")
 
-	load_player(PLAYER_NAME)
+	load_player(PLAYER_NAME, &player)
 
 	for !rl.WindowShouldClose() {
 		rl.BeginDrawing()
@@ -21,7 +20,7 @@ window :: proc(w, h: i32) {
 		rl.EndDrawing()
 	}
 
-	destroy_all_chunks()
-	destroy_assets()
+	destroy_all_chunks(&unloaded_chunks, &loaded_chunks)
+	destroy_assets(&img, &item)
 	rl.CloseWindow()
 }

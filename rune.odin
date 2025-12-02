@@ -3,11 +3,18 @@ package rune
 
 import "core:fmt"
 import "core:mem"
+import rl "vendor:raylib"
 
 JSON_PATH :: "/home/daedalus/dev/odin_projects/rune/json"
 PLAYER_NAME :: "daedalus"
 
+DIMS := [2]i32{ 640, 360 }
+
 player : Player
+img : map[cstring]Image
+item : map[cstring]Item
+tiles: map[cstring]Tile
+unloaded_chunks: map[cstring]map[rl.Vector3]Chunk
 
 main :: proc() {
 
@@ -31,5 +38,5 @@ main :: proc() {
 		}
 	}
 
-	window(100, 100)
+	window(DIMS.x, DIMS.y) 
 }

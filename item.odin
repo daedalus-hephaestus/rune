@@ -4,10 +4,10 @@ import "core:fmt"
 
 Item :: struct {
 	name: cstring,
-	img: cstring
+	img:  cstring,
 }
 
-load_item :: proc(i: ^Item) {
+load_item :: proc(i: ^Item, item_map: ^map[cstring]Item, img_map: ^map[cstring]Image) {
 	img_loaded := img[i.img].texture.id != 0
 
 	if !img_loaded {
@@ -15,6 +15,6 @@ load_item :: proc(i: ^Item) {
 		defer delete(path)
 
 		data := load_json(path, Image)
-		load_img(&data)
+		load_img(&data, img_map)
 	}
 }

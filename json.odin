@@ -1,12 +1,12 @@
 package rune
 
-import "core:fmt"
 import "core:encoding/json"
+import "core:fmt"
+import vmem "core:mem/virtual"
 import "core:os"
 import str "core:strings"
-import vmem "core:mem/virtual"
 
-json_arena : vmem.Arena
+json_arena: vmem.Arena
 
 read_json_dir :: proc(path: string) {
 
@@ -18,7 +18,7 @@ read_json_dir :: proc(path: string) {
 		os.exit(2)
 	}
 
-	file_info : []os.File_Info
+	file_info: []os.File_Info
 	defer os.file_info_slice_delete(file_info)
 
 	file_info, err = os.read_dir(dir, -1)
@@ -40,12 +40,12 @@ read_json_dir :: proc(path: string) {
 
 		if type == "item" {
 			data := load_json(f.fullpath, Item)
-			load_item(&data)
+			load_item(&data, &item, &img)
 		}
 
 		if type == player.realm {
 			data := load_json(f.fullpath, Chunk)
-			preload_chunk(&data)
+			preload_chunk(&data, &tiles, &img, &unloaded_chunks)
 		}
 	}
 
@@ -56,7 +56,7 @@ load_json :: proc(path: string, $T: typeid) -> T {
 		fmt.printfln("Attempting to load %v", path)
 	}
 
-	res : T
+	res: T
 	file_data, ok := os.read_entire_file(path, context.temp_allocator)
 	arena_alloc := vmem.arena_allocator(&json_arena)
 
@@ -73,9 +73,10 @@ load_json :: proc(path: string, $T: typeid) -> T {
 	return res
 }
 
-destroy_assets :: proc() {
-	unload_textures()
-	destroy_tiles()
-	delete(img)
+destroy_assets :: proc(img_map: ^map[cstring]Image, item_map: ^map[cstring]Item) {
+	unload_textures(img_map)
+	destroy_tiles(&tiles)
+	delete(img_map^)
+	delete(item_map^)
 	vmem.arena_destroy(&json_arena)
 }
